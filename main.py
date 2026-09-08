@@ -27,7 +27,7 @@ load_dotenv()
 OPENAI_TEXT_MODEL = os.getenv("OPENAI_TEXT_MODEL", "gpt-4o-mini")
 OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1")
 OPENAI_IMAGE_QUALITY = os.getenv("OPENAI_IMAGE_QUALITY", "low")
-OPENAI_IMAGE_SIZE = os.getenv("OPENAI_IMAGE_SIZE", "1024x1024")
+OPENAI_IMAGE_SIZE = os.getenv("OPENAI_IMAGE_SIZE", "1536x1024")
 FRONTEND_URL = os.getenv(
 	"FRONTEND_URL", "http://localhost:3000,http://localhost:3002"
 )
@@ -317,6 +317,16 @@ the concept could attract clicks. Ground every field in the submitted video's ti
 transcript, channel, and available public thumbnail context. Never use a generic example topic.
 seo_score is only an estimated AI assessment,
 never an official YouTube score or ranking guarantee.
+
+Score seo_score consistently and conservatively-generous, anchored on these bands:
+- 80-100: title, description, and keywords are clear, relevant, and well-targeted to the video's real
+  topic and audience, even if metadata is sparse (a short, well-known, or well-branded title still
+  qualifies). This should be the common case for real, coherent videos.
+- 50-79: metadata is usable but generic, thin, or only loosely matched to the topic.
+- Below 50: reserved for metadata that is missing, contradictory, misleading, or largely irrelevant
+  to the actual content.
+Do not lower the score merely because transcript context is absent; judge the metadata that is
+actually available. Given the same video context, your score should not swing wildly between runs.
 """
 	user_input = json.dumps(
 		{
@@ -335,6 +345,7 @@ never an official YouTube score or ranking guarantee.
 			instructions=instructions,
 			input=f"Create the publishing package as json for this exact public YouTube video context: {user_input}",
 			text={"format": {"type": "json_object"}},
+			temperature=0.4,
 		)
 		raw_output = response.output_text.strip()
 		result = json.loads(raw_output)
